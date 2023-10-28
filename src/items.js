@@ -1,7 +1,7 @@
 const items = [
-  { id: 5, name: 'moi' },
-  { id: 6, name: 'hei' },
-  { id: 19, name: 'Hei hei' },
+  { id: 5, name: 'Veeti' },
+  { id: 6, name: 'Valtteri' },
+  { id: 19, name: 'Miro' },
 ];
 
 const getItems = (res) => {
