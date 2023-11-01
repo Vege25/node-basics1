@@ -1,50 +1,34 @@
-// index.js
-import http from 'http';
-import {
-  items,
-  getItems,
-  getItemsById,
-  postItem,
-  deleteItem,
-  updateItem,
-} from './items.js';
-
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { getItems, getItemsById, postItem } from './items.js';
 const hostname = '127.0.0.1';
+const app = express();
 const port = 3000;
-// test
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const server = http.createServer((req, res) => {
-  const { method, url } = req;
-  const reqParts = url.split('/');
-  console.log('request: ' + req.method + ' url: ' + req.url);
-  // TODO check method, url and generate response accordingly
-  // use e.g. if else
-  if (method === 'GET' && url === '/') {
-    res.writeHead(200, { 'Content-Type': 'text/html' });
-    res.write('<h1>Welcome to my api</h1>');
-    res.write('<p>documentation comes here</p>');
-    res.end();
-  } else if (method === 'GET' && reqParts[1] === 'items' && reqParts[2]) {
-    console.log('GET Items with id ', reqParts[2]);
-    getItemsById(res, reqParts[2]);
-  } else if (method === 'GET' && reqParts[1] === 'items') {
-    console.log('GET Items');
-    getItems(res);
-  } else if (method === 'POST' && reqParts[1] === 'items') {
-    console.log('POSTING items');
-    postItem(req, res);
-  } else if (method === 'DELETE' && reqParts[1] === 'items' && reqParts[2]) {
-    console.log('DELETING items');
-    deleteItem(res, reqParts[2]);
-  } else if (method === 'PUT' && reqParts[1] === 'items' && reqParts[2]) {
-    console.log('UPDATING items');
-    updateItem(req, res, reqParts[2]);
-  } else {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end('{"message" : "404 Resource not found"}');
-  }
+app.use(express.json());
+app.use('/docs', express.static(path.join(__dirname, '../docs')));
+
+app.get('/', (req, res) => {
+  res.send('Welcome to my REST API!');
 });
 
-server.listen(port, hostname, () => {
+// dummy route
+app.get('/kukkuu', (req, res) => {
+  const myResponse = { message: 'Moro' };
+  res.status(400);
+  res.json(myResponse);
+});
+
+// example items api
+app.get('/api/items', getItems);
+app.get('/api/items/:id', getItemsById);
+app.put('/api/items');
+app.post('/api/items', postItem);
+app.delete('/api/items');
+
+app.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
 });
