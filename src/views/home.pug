@@ -1,0 +1,21 @@
+doctype html
+html
+  head
+    title Media API
+  body
+    h1 Media
+    table
+      tr
+        th Title 
+        th Description 
+        th Filesize
+        th Media Type
+      each media in mediaData
+        tr
+          td= media.title
+          td= media.description
+          td= media.filesize + "bytes"
+          td= media.media_type
+          td 
+            img(src=`../uploads/${media.filename}`, alt="Cat image")
+

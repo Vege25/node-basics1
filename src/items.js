@@ -4,9 +4,28 @@ const items = [
   { id: 19, name: 'Miro' },
 ];
 
+/**
+ * Gets all items
+ *
+ * @param {object} req - http request
+ * @param {object} res - http response
+ */
+
 const getItems = (req, res) => {
-  res.json(items);
+  const limit = req.query.limit;
+  // TODO: check that the value is valid
+  if (limit) {
+    res.json(items.slice(0, limit));
+  } else {
+    res.json(items);
+  }
 };
+
+/**
+ *
+ * @param {*} req
+ * @param {*} res
+ */
 const getItemsById = (req, res) => {
   const { id } = req.params;
   const item = items.find((element) => element.id == id);
