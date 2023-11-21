@@ -2,33 +2,37 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { getItems, getItemsById, postItem } from './items.js';
-import {
-  deleteMediaById,
-  getMedia,
-  getMediaById,
-  mediaItems,
-  postMedia,
-  putMediaById,
-} from './media.js';
-import {
-  deleteUserById,
-  getUserById,
-  getUsers,
-  postUser,
-  putUseraById,
-} from './user.js';
+import likeRouter from './routes/likeRoute.js';
+import mediaRouter from './routes/mediaRouter.js';
+import userRouter from './routes/userRouter.js';
 
 const hostname = '127.0.0.1';
+const multer = require('multer');
 const app = express();
 const port = 3000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/'); // Set the destination folder for uploaded files
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname); // Set the file name
+  },
+});
+const upload = multer({ storage: storage });
 
 app.set('view engine', 'pug');
 app.set('views', 'src/views');
 
 app.use(express.json());
 app.use('/docs', express.static(path.join(__dirname, '../docs')));
+
+// Routes
+app.use('/api/media', mediaRouter);
+app.use('/api/user', userRouter);
+app.use('/api/likes', likeRouter);
 
 // middleware
 app.use((req, res, next) => {
@@ -55,20 +59,6 @@ app.get('/api/items/:id', getItemsById);
 app.put('/api/items');
 app.post('/api/items', postItem);
 app.delete('/api/items');
-
-// Media api endpoints
-app.get('/api/media', getMedia);
-app.get('/api/media/:id', getMediaById);
-app.post('/api/media', postMedia);
-app.put('/api/media/:id', putMediaById);
-app.delete('/api/media/:id', deleteMediaById);
-
-// Users api endpoints
-app.get('/api/user', getUsers);
-app.get('/api/user/:id', getUserById);
-app.post('/api/user', postUser);
-app.put('/api/user/:id', putUseraById);
-app.delete('/api/user/:id', deleteUserById);
 
 app.get('/', (req, res) => {
   res.render('home', { mediaData: mediaItems });
