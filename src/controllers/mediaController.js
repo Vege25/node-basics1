@@ -1,3 +1,4 @@
+import { validationResult } from 'express-validator';
 import {
   addMedia,
   deleteMedia,
@@ -45,18 +46,29 @@ const getMediaById = async (req, res) => {
  * @param {object} req
  * @param {object} res
  */
-const postMedia = async (req, res) => {
+const postMedia = async (req, res, next) => {
+  // if (!req.file) {
+  //   const error = new Error({ message: 'file missing/invalid' });
+  //   error.status = 400;
+  //   return next(error);
+  // }
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.log('validation error', error.array());
+    const error = new Error({ message: 'invalid input fields' });
+    error.status = 400;
+    return next(error);
+  }
   const { title, description } = req.body;
   const { filename, mimetype, size } = req.file;
   const user_id = req.user.user_id;
-  if (filename && title && user_id) {
-    const newMedia = { title, description, user_id, filename, mimetype, size };
-    const result = await addMedia(newMedia);
-    res.status(201);
-    res.json({ message: 'New media item added.', ...result });
-  } else {
-    res.sendStatus(400);
+  const newMedia = { title, description, user_id, filename, mimetype, size };
+  const result = await addMedia(newMedia);
+  if (result.error) {
+    return next(new Error(result.error));
   }
+  res.status(201);
+  res.json({ message: 'New media item added.', ...result });
 };
 
 /**
@@ -65,7 +77,7 @@ const postMedia = async (req, res) => {
  * @param {object} req
  * @param {object} res
  */
-const putMediaById = async (req, res) => {
+const putMediaById = async (req, res, next) => {
   const media = [
     req.body.filename,
     req.body.title,
@@ -77,7 +89,9 @@ const putMediaById = async (req, res) => {
     res.status(200);
     res.json(result);
   } else {
-    res.status(400);
+    const error = new Error({ message: 'Invalid input' });
+    error.status = 400;
+    return next(error);
   }
 };
 /**
@@ -86,12 +100,13 @@ const putMediaById = async (req, res) => {
  * @param {object} req
  * @param {object} res
  */
-const deleteMediaById = async (req, res) => {
+const deleteMediaById = async (req, res, next) => {
   try {
     const result = await deleteMedia(req.params.id);
     if (result.affectedRows < 1) {
-      res.status(404);
-      return;
+      const error = new Error({ message: 'Invalid input' });
+      error.status = 400;
+      return next(error);
     }
     res.status(200);
     res.json({

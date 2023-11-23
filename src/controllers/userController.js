@@ -1,3 +1,4 @@
+import { validationResult } from 'express-validator';
 import {
   addUser,
   deleteUser,
@@ -45,14 +46,16 @@ const getUserById = async (req, res) => {
  * @param {object} req
  * @param {object} res
  */
-const postUser = async (req, res) => {
+const postUser = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.log(errors.array());
+    const error = new Error({ message: 'Invalid input' });
+    error.status = 400;
+    return next(error);
+  }
   try {
-    const data = [
-      req.body.username,
-      req.body.password,
-      req.body.email,
-      req.body.user_level_id,
-    ];
+    const data = [req.body.username, req.body.password, req.body.email, 2];
 
     const result = await addUser(data);
     if (!result) {
@@ -71,7 +74,7 @@ const postUser = async (req, res) => {
  * @param {object} req
  * @param {object} res
  */
-const putUserById = async (req, res) => {
+const putUserById = async (req, res, next) => {
   try {
     const data = [
       req.body.username,
@@ -82,8 +85,9 @@ const putUserById = async (req, res) => {
     ];
     const result = await updateUser(data);
     if (!result) {
-      res.status(404);
-      return;
+      const error = new Error({ message: 'Invalid input' });
+      error.status = 400;
+      return next(error);
     }
     res.json({
       message: 'user updated',
@@ -98,12 +102,13 @@ const putUserById = async (req, res) => {
  * @param {object} req
  * @param {object} res
  */
-const deleteUserById = async (req, res) => {
+const deleteUserById = async (req, res, next) => {
   try {
     const result = await deleteUser(req.params.id);
     if (!result) {
-      res.status(404);
-      return;
+      const error = new Error({ message: 'Invalid input' });
+      error.status = 400;
+      return next(error);
     }
     res.status(200);
     res.json({
