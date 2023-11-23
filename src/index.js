@@ -2,37 +2,23 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { getItems, getItemsById, postItem } from './items.js';
+import { errorHandler, notFoundHandler } from './middlewares/middlewares.mjs';
+import authRouter from './routes/authRoute.js';
 import likeRouter from './routes/likeRoute.js';
 import mediaRouter from './routes/mediaRouter.js';
 import userRouter from './routes/userRouter.js';
 
 const hostname = '127.0.0.1';
-const multer = require('multer');
 const app = express();
 const port = 3000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/'); // Set the destination folder for uploaded files
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname); // Set the file name
-  },
-});
-const upload = multer({ storage: storage });
 
 app.set('view engine', 'pug');
 app.set('views', 'src/views');
 
 app.use(express.json());
 app.use('/docs', express.static(path.join(__dirname, '../docs')));
-
-// Routes
-app.use('/api/media', mediaRouter);
-app.use('/api/user', userRouter);
-app.use('/api/likes', likeRouter);
 
 // middleware
 app.use((req, res, next) => {
@@ -63,6 +49,16 @@ app.delete('/api/items');
 app.get('/', (req, res) => {
   res.render('home', { mediaData: mediaItems });
 });
+
+// endpoints
+app.use('/api/media', mediaRouter);
+app.use('/api/user', userRouter);
+app.use('/api/likes', likeRouter);
+app.use('/api/auth', authRouter);
+
+// 404 & error handler
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 app.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
