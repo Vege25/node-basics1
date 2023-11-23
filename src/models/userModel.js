@@ -1,6 +1,20 @@
 import pool from '../utils/database.mjs';
 const promisePool = pool.promise();
 
+const login = async (user) => {
+  try {
+    const [rows] = await promisePool.execute(
+      `SELECT user_id, username, user_level_id, email
+      FROM bet_users WHERE username = ? AND password = ?`,
+      user
+    );
+    return rows[0];
+  } catch (e) {
+    console.error('login', e.message);
+    return { error: e.message };
+  }
+};
+
 const listAllUsers = async () => {
   try {
     const [rows] = await promisePool.execute(`SELECT * FROM bet_users`);
@@ -58,4 +72,4 @@ const deleteUser = async (id) => {
     console.error('deleteUser', e.message);
   }
 };
-export { deleteUser, updateUser, addUser, findUserById, listAllUsers };
+export { deleteUser, updateUser, addUser, findUserById, listAllUsers, login };
