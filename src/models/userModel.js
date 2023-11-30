@@ -1,16 +1,17 @@
 import pool from '../utils/database.mjs';
 const promisePool = pool.promise();
 
-const login = async (user) => {
+const login = async (username) => {
   try {
-    const [rows] = await promisePool.execute(
-      `SELECT user_id, username, user_level_id, email
-      FROM bet_users WHERE username = ? AND password = ?`,
-      user
-    );
+    const sql = `SELECT user_id, username, password, email, user_level_id
+                 FROM bet_users WHERE username = ?`;
+    const params = [username];
+    const result = await promisePool.query(sql, params);
+    const [rows] = result; // first item in result array is the data rows
+    // console.log('login, user found?', rows[0]);
     return rows[0];
   } catch (e) {
-    console.error('login', e.message);
+    console.error('error', e.message);
     return { error: e.message };
   }
 };
@@ -39,13 +40,15 @@ const findUserById = async (id) => {
 
 const addUser = async (user) => {
   try {
-    const [rows] = await promisePool.execute(
-      `INSERT INTO bet_users (username, password, email, user_level_id) VALUES (?, ?, ?, ?);`,
-      user
-    );
-    return rows;
+    const sql = `INSERT INTO bet_users (username, email, password, user_level_id)
+                VALUES (?, ?, ?, ?)`;
+    // user level id defaults to 2 (normal user)
+    const params = [user.username, user.email, user.password, 2];
+    const result = await promisePool.query(sql, params);
+    return result[0].insertId;
   } catch (e) {
-    console.error('addUser', e.message);
+    console.error('error', e.message);
+    return { error: e.message };
   }
 };
 

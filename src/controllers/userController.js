@@ -5,6 +5,8 @@ import {
   listAllUsers,
   updateUser,
 } from '../models/userModel.js';
+import bcrypt from 'bcryptjs';
+import { validationResult } from 'express-validator';
 
 /**
  * Get all users
@@ -46,24 +48,19 @@ const getUserById = async (req, res) => {
  * @param {object} res
  */
 const postUser = async (req, res) => {
-  try {
-    const data = [
-      req.body.username,
-      req.body.password,
-      req.body.email,
-      req.body.user_level_id,
-    ];
-
-    const result = await addUser(data);
-    if (!result) {
-      res.status(404);
-      return;
-    }
-    res.status(201);
-    res.json({ message: 'User added' });
-  } catch (e) {
-    console.error('postUser', e.message);
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    // details about errors:
+    console.log(errors.array());
+    return res.status(400).json({ message: 'invalid input fields' });
   }
+  const newUser = req.body;
+  const salt = await bcrypt.genSalt(10);
+  // replace plain text password with hash
+  newUser.password = await bcrypt.hash(newUser.password, salt);
+  // console.log('postUser', newUser);
+  const newUserId = await addUser(newUser);
+  res.status(201).json({ message: 'user added', user_id: newUserId });
 };
 /**
  * Update one user with id
