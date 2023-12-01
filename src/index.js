@@ -11,6 +11,7 @@ import authRouter from './routes/authRoute.js';
 import likeRouter from './routes/likeRoute.js';
 import mediaRouter from './routes/mediaRouter.js';
 import userRouter from './routes/userRouter.js';
+import helmet from 'helmet';
 
 const hostname = '127.0.0.1';
 const app = express();
@@ -25,6 +26,8 @@ app.disable('x-powered-by');
 
 app.use(express.json());
 app.use('/docs', express.static(path.join(__dirname, '../docs')));
+
+app.use(helmet());
 
 // simple custom middleware for logging/debugging all requests
 app.use(logger);
