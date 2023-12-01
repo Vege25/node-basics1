@@ -38,8 +38,8 @@ const authRouter = express.Router();
  *
  * @apiDescription Sign in and get an authentication token for the user.
  *
- * @apiParam {String} username Username of the user.
- * @apiParam {String} password Password of the user.
+ * @apiParam {String} username Username of the user. (In the request body)
+ * @apiParam {String} password Password of the user. (In the request body)
  *
  * @apiParamExample {json} Request-Example:
  *    {
@@ -54,10 +54,7 @@ const authRouter = express.Router();
  *    HTTP/1.1 200 OK
  *    {
  *      "message": "Logged in successfully",
- *      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyMSwid
- *                XNlcm5hbWUiOiJ1dXNpMSIsImVtYWlsIjoidXVzaTFAZXhhbXBsZS5jb20
- *                iLCJ1c2VyX2xldmVsX2lkIjoyLCJpYXQiOjE3MDEyNzkzMjJ9.3TbVTcXS
- *                dryTDm_huuXC_U1Lg4rL0SOFyn_WAsC6W0Y"
+ *      "token": "yourAuthTokenHere",
  *      "user": {
  *        "user_id": 21,
  *        "username": "johnd",
